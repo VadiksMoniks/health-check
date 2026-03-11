@@ -6,6 +6,7 @@ use App\Models\Health;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class HealthController extends Controller
 {
@@ -26,12 +27,22 @@ class HealthController extends Controller
             $db = false;
             $status = 500;
         }
+        try {
+            Redis::ping();
+            $cache = true;
+        } catch (\Exception $e) {
+            $cache = false;
+            $status = 500;
+        }
 
-        $record = new Health();
-        $record->db = true;
-        $record->cache = true;
-        $record->uuid = $request->header('X-Owner');
-        $record->save();
+        if($db && $cache)
+        {
+            $record = new Health();
+            $record->db = true;
+            $record->cache = true;
+            $record->uuid = $request->header('X-Owner');
+            $record->save();
+        }
 
         return response()->json([
             'db' => $db,
