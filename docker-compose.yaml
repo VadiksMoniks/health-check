@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    depends_on:
+      - mysql
+      - redis
+    command: sh -c "sleep 10 && php artisan migrate --force && php-fpm"
+
+  nginx:
+    image: nginx:latest
+    container_name: laravel_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./.docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8
+    container_name: laravel_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: health_check
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:7
+    container_name: laravel_redis
+    ports:
+      - "6379:6379"
