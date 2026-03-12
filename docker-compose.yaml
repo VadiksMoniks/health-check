@@ -13,7 +13,7 @@ services:
     depends_on:
       - mysql
       - redis
-    command: sh -c "sleep 10 && php artisan migrate --force && php-fpm"
+    command: sh -c "composer install && sleep 10 && php artisan migrate --force && php-fpm"
 
   nginx:
     image: nginx:latest
